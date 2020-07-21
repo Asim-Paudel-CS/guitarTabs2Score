@@ -1,14 +1,14 @@
+from operator import attrgetter
+class notes():
+    def __init__(self,note,strn,beat):
+        self.note = note
+        self.strn = strn
+        self.beat = beat
+
 def inputfun():
-    fileopen = open("sampleinput.txt",'r')#change to manual file later
+    fileopen = open("sampleinput2.txt",'r')#change to manual file later
     if fileopen.mode == 'r':
         unprocessedtabs = fileopen.read()
-        print(unprocessedtabs)
-
-        class notes():
-            def __init__(self,note,strn,beat):
-                self.note = note
-                self.strn = strn
-                self.beat = beat
 
         stringno = 0 #for initial blank spaces
         beats = 0
@@ -20,7 +20,8 @@ def inputfun():
         beatsdeb = ""
         noteind = ""
         openstring = False
-        printnote = False #debug
+        output = "|"
+        p = 0
 
         for char in unprocessedtabs:
 
@@ -50,6 +51,13 @@ def inputfun():
                 changerow = True
                 beats = prevbeats
 
+            checkstr = True
+            for stringcheck in " |eBGDAE" :
+                if char == stringcheck or char == "\n" or char == "\r":
+                    checkstr = False
+            if checkstr:
+                beats += 1
+
             for stringcheck in "1234567890":
                 if char == stringcheck:
                     noteind += char
@@ -58,25 +66,70 @@ def inputfun():
                 notenum = int(noteind)
                 openstring = False
                 noteind = ""
-                printnote = True
+                ncf.append(notes(notenum,stringno,beats))
 
-            checkstr = True
-            for stringcheck in " |eBGDAE" :
-                if char == stringcheck or char == "\n" or char == "\r":
-                    checkstr = False
-            if checkstr:
-                beats += 1
-                if printnote:
-                    beatsdeb = beatsdeb + str(notenum)
-                else:
-                    beatsdeb = beatsdeb + "-"#debug
+    indnote = notes(0,0,0)
+    sortedncf= sorted(ncf, key= attrgetter('beat'))
+    prevbeats = sortedncf[0].beat
+    for indnote in sortedncf:
+        capo = 0
+        if indnote.strn == 1:
+            note = indnote.note + 28 + capo
+        elif indnote.strn == 2:
+            note = indnote.note + 23 + capo
+        elif indnote.strn == 3:
+            note = indnote.note + 19 + capo
+        elif indnote.strn == 4:
+            note = indnote.note + 14 + capo
+        elif indnote.strn == 5:
+            note = indnote.note + 9 + capo
+        elif indnote.strn == 6:
+            note = indnote.note + 4 + capo
 
-            if char== "\n" or char == "\r":
-                beatsdeb = beatsdeb + "beatcount=" + str(beats) + "\n"#debug
+        octave = (note//12) + 2
+        key = (note%12)
+        keystr = ""
 
-            printnote =False
+        if key==0:
+            keystr = "C"
+        elif key==1:
+            keystr = "C#"
+        elif key==2:
+            keystr = "D"
+        elif key==3:
+            keystr = "D#"
+        elif key==4:
+            keystr = "E"
+        elif key==5:
+            keystr = "F"
+        elif key==6:
+            keystr = "F#"
+        elif key==7:
+            keystr = "G"
+        elif key==8:
+            keystr = "G#"
+        elif key==9:
+            keystr = "A"
+        elif key==10:
+            keystr = "A#"
+        elif key==11:
+            keystr = "B"
 
-        print(beatsdeb)#debug
+        truenote = keystr+str(octave)
+        if indnote.beat == prevbeats:
+            output += " "+ truenote + " "
+            
+        else:
+            if p%10 == 9:
+                output += "|\n"
+            p+=1
+            prevbeats = indnote.beat
+            output +="| " + truenote          
+            
+        
+            
+    output+=" |"
+    print(output)
     return None
 
 def main():
